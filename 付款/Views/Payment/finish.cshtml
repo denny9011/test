@@ -1,0 +1,44 @@
+﻿@{
+    ViewBag.Title = "finish";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>交易完成</title>
+    <!-- 這裡可以放置 CSS 樣式或其他相關檔案的引用 -->
+</head>
+<body>
+    <div style="text-align: center; margin-top: 100px;">
+        <h1>您的交易已完成</h1>
+        <p>感謝您的購買！</p>
+        <button type="button" id="backhome" class="backhome">返回首頁</button>
+        <button type="button" id="reserve" class="reserve">查看訂單狀態</button>
+    </div>
+</body>
+</html>
+<script>
+    document.getElementById('backhome').addEventListener('click', function () {
+        window.location.href = '/';
+    });
+    document.getElementById('reserve').addEventListener('click', function () {
+        window.location.href = '/Home/OrderList';
+    });
+</script>
+<style>
+    .backhome,
+    .reserve {
+        background-color: #FDCB47; /* 設置按鈕背景顏色為黃色 */
+        color: #3058d9; /* 設置按鈕文字顏色為黑色 */
+        border: 1px solid #000; /* 添加黑線邊框，寬度為1像素 */
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        .backhome:hover,
+        .reserve:hover {
+            background-color: #FDCB47; /* 在懸停狀態下保持黃色背景 */
+            color: #000000; /* 在懸停狀態下將文字顏色設置為黑色 */
+            text-decoration: underline; /* 在懸停狀態下保持文字有底線 */
+        }
+</style>

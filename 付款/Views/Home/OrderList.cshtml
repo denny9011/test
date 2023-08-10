@@ -1,0 +1,198 @@
+﻿@model IEnumerable<project.Models.tOrder>
+
+@{
+    ViewBag.Title = "訂單紀錄";
+    //沒transationId && paid =="未付款"的加總
+    var a = Model.Count(item => string.IsNullOrEmpty(item.fTrancsationId) && item.fPaid == "未付款");
+    //有transationId && paid =="未付款"的加總
+    var b = Model.Count(item => !string.IsNullOrEmpty(item.fTrancsationId) && item.fPaid == "未付款");
+    var totalUnpaidOrders = a + b;
+}
+@using (Html.BeginForm("OrderList", "Home", FormMethod.Get))
+{
+    <div class="form-group">
+        @Html.Label("搜尋：")
+        @Html.TextBox("searchOrder", ViewBag.CurrentFilter as string, new { @class = "form-control" })
+
+        <button type="submit" id="searchButton" class="btn btn-warning">搜索</button>
+    </div>
+}
+<h2>訂單紀錄</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.fOrderGuid)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.fUserId)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.fReceiver)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.fEmail)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.fAddress)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.fDate)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.fTrancsationId)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.fPaid)
+        </th>
+        <th>
+            @if (totalUnpaidOrders >= 1) //計算未完成的訂單數量
+            {
+                <span class="not-paid-text">
+                    有 @totalUnpaidOrders 筆訂單尚未完成付款!
+                </span>
+            }
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.fOrderGuid)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.fUserId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.fReceiver)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.fEmail)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.fAddress)
+            </td>
+            <td style="width: 170px;">
+                @Html.DisplayFor(modelItem => item.fDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.fTrancsationId)
+            </td>
+            <td style="width: 75px;">
+                @Html.DisplayFor(modelItem => item.fPaid)
+            </td>
+            <td style="width: 215px;">
+
+                @if (string.IsNullOrEmpty(item.fTrancsationId) && item.fPaid == "未付款") //沒transationId && paid =="未付款"時
+                {
+                    if (item == Model.FirstOrDefault()) //第一筆顯示linepay 與銀行轉帳
+                    {
+                        <input id="Line_btn2" type="button" value="Line Pay" class="Line_btn2 btn btn-primary" />
+                        <input data-order-id="@item.fId" type="button" value="銀行轉帳" class="bank-btn btn btn-primary" />
+                    }
+                    else //第二筆開始只顯示銀行轉帳
+                    {
+                        <span class="repaid-text">
+                            訂單已取消<br />
+                            請重新下單或使用銀行轉帳!
+                        </span>
+                        <br />
+                        <input data-order-id="@item.fId" type="button" value="銀行轉帳" class="bank-btn btn btn-primary" />
+                    }
+
+                }
+                else if (!string.IsNullOrEmpty(item.fTrancsationId) && item.fPaid == "未付款") //有transationId && paid =="未付款"時
+                {
+                    <span class="repaid-text">
+                        linepay交易或請款時發生錯誤!<br />
+                        請重新下單或使用銀行轉帳!
+                    </span>
+                    <br />
+                    <input data-order-id="@item.fId" type="button" value="銀行轉帳" class="bank-btn btn btn-primary" />
+                }
+                else if (item.fPaid == "銀行付款審核中") //有transationId && paid =="未付款"時
+                {
+                    <span class="wait-text">
+                        付款完成後請等待系統進行核對<br />
+                        ，如核對完成後將會更改訂單狀態為已付款!!
+                    </span>
+                }
+
+                else //有transationId && paid =="已付款"時
+                {
+                    <span class="finishpaid-text">交易已完成!感謝您的購買!</span>
+                }
+            </td>
+            <td>
+                @if (Session["Member"] == null)
+                { }
+                else
+                {
+                    <p>
+                        <a href="@Url.Action("Delete", "Home", new { fId = item.fId})"
+                           class="btn btn-primary">刪除</a>
+                    </p>
+                }
+            </td>
+        </tr>
+    }
+</table>
+<script>
+    document.getElementById("Line_btn2").addEventListener("click", function () {
+        window.location.href = "/Payment/APIRequest";
+    });
+</script>
+<script>
+    //使用fId使每個訂單的button都導向其fid的銀行轉帳介面
+
+    // 等待網頁DOM載入完成
+    document.addEventListener("DOMContentLoaded", function () {
+        // 找到所有class為bank-btn的按鈕元素
+        var bankButtons = document.getElementsByClassName("bank-btn");
+
+        // 對每個按鈕綁定點擊事件
+        for (var i = 0; i < bankButtons.length; i++) {
+            var button = bankButtons[i];
+            button.addEventListener("click", function () {
+                // 取得按鈕的data-order-id屬性值，即訂單的唯一ID
+                var orderId = this.getAttribute("data-order-id");
+                // 使用訂單ID來組成導向的URL
+                window.location.href = "/Home/bank/" + orderId;
+            });
+        }
+    });
+</script>
+<style>
+    .wait-text {
+        color: blue;
+    }
+
+    .not-paid-text {
+        color: red;
+    }
+
+    .repaid-text {
+        color: red;
+    }
+
+    .finishpaid-text {
+        color: limegreen;
+    }
+
+    .Line_btn2, .bank-btn {
+        background-color: #FDCB47;
+        color: #3058d9; /* 設置按鈕文字顏色為黑色 */
+        border: 1px solid #000; /* 添加黑線邊框，寬度為1像素 */
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        .Line_btn2:hover, .bank-btn:hover {
+            background-color: #FDCB47;
+            color: #000;
+            text-decoration: underline;
+        }
+</style>

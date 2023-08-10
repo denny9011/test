@@ -1,0 +1,76 @@
+﻿@{
+    ViewBag.Title = "付款方式";
+}
+
+<h2><strong>選擇付款方式</strong></h2>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>付款方式</title>
+    <style>
+        #Line {
+            width: 500px;
+            height: 500px;
+            float: left
+        }
+
+        #Line_btn {
+            background-color: #FDCB47; /* 設置按鈕背景顏色為黃色 */
+            color: #3058d9; /* 設置按鈕文字顏色為黑色 */
+            border: 1px solid #000; /* 添加黑線邊框，寬度為1像素 */
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 500px;
+            position: relative;
+            left: 8em;
+        }
+
+        #bank {
+            width: 500px;
+            height: 500px;
+            float: right
+        }
+
+        #bank_btn {
+            background-color: #FDCB47; /* 設置按鈕背景顏色為黃色 */
+            color: #3058d9; /* 設置按鈕文字顏色為黑色 */
+            border: 1px solid #000; /* 添加黑線邊框，寬度為1像素 */
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 300px;
+            position: relative;
+            left: 33em;
+        }
+
+        #Line_btn:hover {
+            background-color: #FDCB47; /* 在懸停狀態下保持黃色背景 */
+            color: #000000; /* 在懸停狀態下將文字顏色設置為黑色 */
+            text-decoration: underline; /* 在懸停狀態下保持文字有底線 */
+        }
+
+        #bank_btn:hover {
+            background-color: #FDCB47; /* 在懸停狀態下保持黃色背景 */
+            color: #000000; /* 在懸停狀態下將文字顏色設置為黑色 */
+            text-decoration: underline; /* 在懸停狀態下保持文字有底線 */
+        }
+    </style>
+</head>
+<body>
+    <img id="Line" src="~/images/line-pay-1.png" /><img id="bank" src="~/images/iphone8.jpg" /><br />
+    <input id="Line_btn" type="button" value="Line Pay" />
+    <button id="bank_btn">銀行轉帳</button>
+    <script>
+        document.getElementById("bank_btn").addEventListener("click", function () {
+            window.location.href = "/Home/bank";
+        });
+        document.getElementById("Line_btn").addEventListener("click", function () {
+            window.location.href = "/Payment/APIRequest";
+        });
+    </script>
+    @*<form action="Payment/APIRequest" method="post" id="frmPayment">
+            <input type="hidden" name="hidProductDetails" value="@ViewData["ProductDetails"].ToString()" />
+        </form>*@
+</body>
+</html>

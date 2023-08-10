@@ -1,0 +1,11 @@
+﻿@{
+    ViewBag.Title = "會員登入";
+}
+
+<h2>會員登入</h2>
+<form method="post" action="@Url.Action("Login")">
+    帳號:<input type="text" id="fUserId" name="fUserId" required value="123" />
+    <br />密碼:<input type="password" id="fPwd" name="fPwd" required value="123" />
+    <br /><input type="submit" value="登入" />
+    <br />@ViewBag.Message
+</form>

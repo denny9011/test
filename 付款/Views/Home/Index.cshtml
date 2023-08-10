@@ -1,0 +1,29 @@
+﻿@model IEnumerable<project.Models.tProduct>
+@{
+    ViewBag.Title = "產品列表";
+}
+
+<div class="row">
+    @foreach (var item in Model)
+    {<div class="col-xs-4">
+        <div class="thumbnail">
+            <img src="~/images/@item.fImg" />
+            <div class="caption">
+                <h2>@item.fName</h2>
+                <p>單價:@item.fPrice</p>
+                @if (Session["Member"] == null)
+                    {
+                <p></p>
+                    }
+                    else
+                    {
+                <p>
+                    <a href="@Url.Action("AddCar")?fPid=@item.fPId"
+                       class="btn btn-primary">加入購物車</a>
+                </p>
+                    }
+            </div>
+        </div>
+    </div>
+    }
+</div>

@@ -1,0 +1,78 @@
+﻿<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>確認請款</title>
+    <style>
+        /* Style for table */
+        table {
+            border-collapse: collapse;
+            width: 500px;
+            margin: 20px auto;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #FDCB47;
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* Style for buttons */
+        .bank-btn {
+            background-color: #FDCB47;
+            color: #3058d9; /* 設置按鈕文字顏色為黑色 */
+            border: 1px solid #000; /* 添加黑線邊框，寬度為1像素 */
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            .bank-btn:hover {
+                background-color: #FDCB47;
+                color: #000;
+                text-decoration: underline;
+            }
+    </style>
+</head>
+<body>
+    <center>
+        <form action="APIConfirm?transactionId=@ViewData["transactionId"]&orderId=@ViewData["orderId"]&amount=@ViewData["totalAmount"]&currency=TWD" method="post">
+            <h3>商品資訊</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>商品</th>
+                        <th>購買數量</th>
+                        <th>價格</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                    <tr>
+                        <td> @item.fName </td>
+                        <td> @item.fQty </td>
+                        <td> @item.fPrice</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+
+            <table>
+                <tbody>
+                    <tr>
+                        <td colspan="2" style="text-align: center; font-size: 20px; font-weight: bold;"> 總金額 : @ViewData["totalAmount"] </td>
+                    </tr>
+                    <tr>
+                        <td align="center" colspan="2"><input type="submit" value="確認付款" class="bank-btn" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </center>
+</body>
+</html>

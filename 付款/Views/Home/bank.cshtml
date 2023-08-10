@@ -1,0 +1,108 @@
+﻿@model IEnumerable<project.Models.tOrder>
+@{
+    ViewBag.Title = "付款方式";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>付款方式</title>
+    <style>
+        .payment-details {
+            border-radius: 5px;
+            padding: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: #ffffff;
+            border: 2px solid #FDCB47; /* 新增外框樣式 */
+        }
+
+        .centered-text {
+            margin: 0 auto; /* 水平置中 */
+            padding: 5px;
+            border-radius: 5px;
+            font-weight: bold;
+            max-width: 80%; /* 控制文字寬度，根據需要調整 */
+            color: #ff0000;
+        }
+
+        .number {
+            color: #ff0000;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        h3 {
+            margin: 0;
+            padding: 5px;
+            border-radius: 5px 5px 0 0;
+            font-weight: bold;
+        }
+
+
+
+        .title {
+            background-color: #ffffff;
+            color: #000;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <table>
+            <thead>
+                <tr>
+                    <th>
+                        <h2 class="title">銀行轉帳</h2>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+    </center>
+    <div class="payment-details">
+        <h3>銀行帳戶:</h3>
+        <h3 class="number">1234 5678 9111 1111</h3>
+        <h3>銀行代碼:</h3>
+        <h3 class="number">822</h3><br>
+        <button id="showMessageButton">完成付款</button>
+        <p class="centered-text hidden">若付款完成後請等待系統進行核對，如</p>
+        <p class="centered-text hidden">核對完成後將會更改訂單狀態為已付款!!</p>
+        <select id="orderSelect">
+            @foreach (var order in ViewBag.OrderList)
+            {
+                <option value="@order.fId">@order.fDate</option>
+            }
+        </select>
+    </div>
+    <script>
+        const showMessageButton = document.getElementById('showMessageButton');
+        const messages = document.querySelectorAll('.centered-text');
+        const orderSelect = document.getElementById('orderSelect');
+
+        showMessageButton.addEventListener('click', () => {
+            messages.forEach(message => {
+                message.classList.toggle('hidden');
+            });
+
+            const selectedOrderId = orderSelect.value;
+
+            // 透過 Ajax 請求觸發後端付款處理
+            fetch(`/Home/ProcessPayment?orderId=${selectedOrderId}`, {
+                method: 'POST'
+            }).then(response => {
+                if (response.ok) {
+                    alert(`訂單 ${selectedOrderId} 已付款完成`);
+                } else {
+                    alert('付款處理失敗');
+                }
+            }).catch(error => {
+                alert('付款處理失敗');
+            });
+        });
+    </script>
+
+</body>
+</html>

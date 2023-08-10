@@ -1,0 +1,236 @@
+﻿@model IEnumerable<project.Models.ViewModel.ShoppingCarItem>
+
+@{
+    ViewBag.Title = "ShoppingCar";
+}
+
+<h2><strong>購物車</strong></h2>
+
+<table class="table">
+    <tr>
+        <th></th>
+        <th>
+            @Html.DisplayNameFor(model => model.UserId)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Pid)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Price)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Qty)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.IsApproved)
+        </th>
+        <th></th>
+    </tr>
+    @foreach (var item in Model)
+    {
+    <tr>
+        <td>
+            <input type="checkbox" onclick="check()" />
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.UserId)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Pid)
+        </td>
+        <td>
+            <span class="item-name">@Html.DisplayFor(modelItem => item.Name)</span>
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Price)
+        </td>
+        <td>
+            <input type="number" onclick="calculateTotal()" data-price="@item.Price" min="1" value="1" />
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.IsApproved)
+        </td>
+        <td>
+            <a href="@Url.Action("Deletecar", "Home", new { fId = item.Fid})"
+               class="delete" data-product-id="@item.Pid">刪除</a>
+        </td>
+        <td>
+            <span class="item-details" style="display:none;">
+                @item.Name - @item.Price
+            </span>
+        </td>
+    </tr>
+    }
+</table>
+@*顯示購買商品與總金額存放處*@
+<h4 id="text1" class="text">
+    <span id="itemDetails"></span>
+</h4>
+<h4 class="text">
+    <span id="text2" class="text2"></span>
+</h4>
+<form action="@Url.Action("ShoppingCar")" method="post" onsubmit="return validateForm()">
+    <h2 style="font-weight: bold;">訂單資料</h2>
+    收件人姓名:<input type="text" name="fReceiver" id="fReceiver" required />
+    <br />收件人信箱:<input type="text" name="fEmail" id="fEmail" required />
+    <br />地址:<input type="text" name="fAddress" id="fAddress" required />
+    <br /><input type="hidden" name="quantity" id="quantity" />
+    <br /><input type="submit" value="確認訂購" id="reserve" class="bank-btn" />
+    <button type="button" id="backhome" class="bank-btn">繼續購買其他課程</button>
+</form>
+
+<script>
+    function deleteItem() {
+        var productId = this.getAttribute('data-product-id');
+        var item = this.parentNode.parentNode;
+        item.parentNode.removeChild(item);
+        calculateTotal();
+    }
+    // 获取所有删除按钮，并为每个按钮绑定点击事件处理函数
+    var deleteButtons = document.querySelectorAll('.delete');
+    deleteButtons.forEach(function (button) {
+        button.addEventListener('click', deleteItem);
+    });
+</script>
+<script>
+    var itemQuantities = {}; // 新增一个字典保存商品数量，使用商品ID作为键
+
+    function check() {
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        var checkedItems = [];
+        var itemDetails = [];
+
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+                var item = checkbox.parentNode.parentNode;
+                checkedItems.push(item);
+
+                var quantityInput = item.querySelector('input[type="number"]'); // 获取商品数量输入框
+                var quantity = parseInt(quantityInput.value); // 获取商品数量值
+
+                // 获取商品ID
+                var productId = item.querySelector('.delete').getAttribute('data-product-id');
+
+                // 更新保存的商品数量值为用户输入的新值
+                itemQuantities[productId] = quantity;
+
+                var name = item.querySelector('.item-name');
+                itemDetails.push(name.textContent);
+            }
+            else {
+                var item = checkbox.parentNode.parentNode;
+
+                // 获取商品ID
+                var productId = item.querySelector('.delete').getAttribute('data-product-id');
+
+                // 移除未勾选的商品的数量记录
+                delete itemQuantities[productId];
+            }
+        });
+
+        // 重新计算总价格，只计算勾选的商品金额
+        calculateTotal();
+
+        // 更新显示选中商品的名称
+        var text = document.getElementById('text1');
+        text1.innerHTML = "您購買的商品為: " + itemDetails.join(", ");
+        text1.classList.add('text1');
+    }
+</script>
+<script>
+    function calculateTotal() {
+        var inputs = document.querySelectorAll('input[type="number"]');
+        var totalAmount = 0;
+
+        inputs.forEach(function (input) {
+            var quantity = parseInt(input.value);
+            var price = parseFloat(input.getAttribute('data-price'));
+
+            // 只计算勾选的商品金额
+            if (input.parentNode.parentNode.querySelector('input[type="checkbox"]').checked) {
+                totalAmount += quantity * price;
+                // 获取商品ID
+                var productId = input.parentNode.parentNode.querySelector('.delete').getAttribute('data-product-id');
+
+                // 更新保存的商品数量值为用户输入的新值
+                itemQuantities[productId] = quantity;
+            }
+        });
+
+        var text = document.getElementById('text2');
+        text2.innerHTML = "總金額 $" + totalAmount;
+        // 将itemQuantities转换成JSON字符串并赋值给隐藏的input元素
+        var quantityInput = document.getElementById('quantity');
+        quantityInput.value = JSON.stringify(itemQuantities);
+    }
+</script>
+<script>
+    function validateForm() {
+        // 獲取所有複選框
+        var checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        var isChecked = false;
+
+        // 檢查是否有任何複選框被勾選
+        checkboxes.forEach(function (checkbox) {
+            if (checkbox.checked) {
+                isChecked = true;
+            }
+        });
+
+        // 如果至少有一個複選框被勾選，允許提交表單
+        // 否則，顯示錯誤訊息或阻止表單提交
+        if (isChecked) {
+            return true;
+        } else {
+            alert("請選擇至少一項商品。");
+            return false; // 這將阻止表單提交
+        }
+    }
+</script>
+<script>
+    // 跳轉到首頁
+    function clearFormInputs() {
+        document.getElementById('fReceiver').value = '';
+        document.getElementById('fEmail').value = '';
+        document.getElementById('fAddress').value = '';
+    }
+
+    document.getElementById('backhome').addEventListener('click', function () {
+        clearFormInputs();
+        window.location.href = '/';
+    });
+</script>
+
+<style>
+    .text1 {
+        font-size: 20px; /* 設置文字大小為20像素 */
+        font-weight: bold; /* 設置文字加粗 */
+        color: red; /* 設置文字顏色 */
+    }
+
+    .text2 {
+        color: red;
+        font-weight: bold;
+        font-size: 20px;
+    }
+
+    .delete,
+    .bank-btn {
+        background-color: #FDCB47; 
+        color: #3058d9; 
+        border: 1px solid #000;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+        .delete:hover,
+        .bank-btn:hover {
+            background-color: #FDCB47; 
+            color: #000000; 
+            text-decoration: underline; 
+        }
+</style>
